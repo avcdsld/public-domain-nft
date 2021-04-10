@@ -70,7 +70,7 @@ static async getIDs(data) {
         },
         'basic_nft_getIDs',
         {
-            account: '0x' + data.account
+            Address: data.account
         }
     );
 

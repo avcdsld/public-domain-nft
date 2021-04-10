@@ -16,10 +16,15 @@ module.exports = class Blockchain {
         if (args) {
             options.args = [];
             for(let arg in args) {
-                if (typeof args[arg] === 'String') {
+                if (arg === 'String') {
                     options.args.push({
                         value: args[arg],
                         type: t.String
+                    });
+                } else if (arg === 'Address') {
+                    options.args.push({
+                        value: args[arg],
+                        type: t.Address
                     });
                 } else {
                     options.args.push(args[arg]);
