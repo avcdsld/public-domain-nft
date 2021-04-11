@@ -19,13 +19,18 @@ export default class TopNavigation extends LitElement {
     let staticPages = [
       {
         name: "dapp",
-        title: "Home",
+        title: "About",
         route: "/"
       },
       {
-        name: "harness",
-        title: "UI Harness",
-        route: "/harness"
+        name: "create",
+        title: "Create",
+        route: "/create"
+      },
+      {
+        name: "gallery",
+        title: "Gallery",
+        route: "/gallery"
       }
     ];
     return staticPages;
@@ -59,10 +64,10 @@ export default class TopNavigation extends LitElement {
                   return html`
                     <a
                       href="#"
-                      class="ml-4 px-3 py-2 rounded-md text-sm font-medium hover:text-white hover:bg-gray-700 focus:outline-none focus:text-white focus:bg-gray-700 ${document.location.href.endsWith(
+                      class="ml-4 px-3 py-2 rounded-md text-sm font-medium hover:text-white hover:bg-gray-500 focus:outline-none focus:text-white focus:bg-gray-500 ${document.location.href.endsWith(
                         x.route
                       )
-                        ? "bg-gray-700 text-white"
+                        ? "bg-gray-500 text-white"
                         : "text-gray-500"}"
                       @click=${this.handleClick}
                       data-link="${x.name}"

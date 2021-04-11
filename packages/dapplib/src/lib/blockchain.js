@@ -26,6 +26,11 @@ module.exports = class Blockchain {
                         value: args[arg],
                         type: t.Address
                     });
+                } else if (arg === '[UInt64]') {
+                    options.args.push({
+                        value: args[arg],
+                        type: t.Array(t.UInt64)
+                    });
                 } else {
                     options.args.push(args[arg]);
                 }
@@ -58,10 +63,20 @@ module.exports = class Blockchain {
         if (args) {
             options.args = [];
             for(let arg in args) {
-                if (typeof args[arg] === 'String') {
+                if (arg === 'String') {
                     options.args.push({
                         value: args[arg],
                         type: t.String
+                    });
+                } else if (arg === 'Address') {
+                    options.args.push({
+                        value: args[arg],
+                        type: t.Address
+                    });
+                } else if (arg === '{String: String}') {
+                    options.args.push({
+                        value: args[arg],
+                        type: t.Dictionary([...Array(args[arg].length)].map(() => { return { key: t.String, value: t.String }}))
                     });
                 } else {
                     options.args.push(args[arg]);

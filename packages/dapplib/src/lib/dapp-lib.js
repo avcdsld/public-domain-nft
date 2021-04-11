@@ -7,6 +7,8 @@ const BN = require('bn.js'); // Required for injected code
 
 const fcl = require('@onflow/fcl');
 
+const deployerAddress = '0x01cf0e2f2f715450'; // TODO:
+const axios = require('axios').default;
 
 module.exports = class DappLib {
 
@@ -32,7 +34,7 @@ static async initializeAccount(data) {
     let result = await Blockchain.post({
             config: DappLib.getConfig(),
             imports: {
-                DappState: data.account
+                DappState: deployerAddress
             },
             roles: {
                 proposer: data.account
@@ -57,12 +59,61 @@ static async initializeAccount(data) {
 }
 
 
-static async getIDs(data) {
+static async mintNFT(data) {
+    // Fetch the art info from The Metropolitan Museum of Art
+    //
+    const regex = /www.metmuseum.org\/art\/collection\/search\/(\d+)/;
+    if (!regex.test(data.url)) {
+        console.log('Error!');
+        throw new Error('Enter a URL of Open Access Collection at Metropolitan Museum of Art. Search site: https://www.metmuseum.org/art/collection/search#!?showOnly=highlights%7CopenAccess');
+    }
 
+    const externalUrl = data.url.split('?').shift(); // delete query params
+    const objectId = externalUrl.match(regex)[1];
+    const metadataUrl = `https://collectionapi.metmuseum.org/public/collection/v1/objects/${objectId}`;
+    const originalMetadata = (await axios.get(metadataUrl)).data;
+    console.log({originalMetadata});
+    if (!originalMetadata.isPublicDomain) {
+        throw new Error('This art work is not for public domain');
+    }
+
+    const metadata = [
+        { key: 'metadataUrl', value: metadataUrl },
+        { key: 'title', value: originalMetadata.title || '' },
+        { key: 'artistDisplayName', value: originalMetadata.artistDisplayName || '' },
+        { key: 'objectDate', value: originalMetadata.objectDate || '' },
+        { key: 'imageUrl', value: originalMetadata.primaryImageSmall || originalMetadata.primaryImage || '' },
+        { key: 'externalUrl', value: externalUrl }
+    ];
+
+    let result = await Blockchain.post({
+            config: DappLib.getConfig(),
+            imports: {
+                DappState: deployerAddress
+            },
+            roles: {
+                proposer: data.account
+            }
+        },
+        'basic_nft_mintNFT',
+        {
+            Address: data.account,
+            '{String: String}': metadata
+        }
+    );
+    return {
+        type: DappLib.DAPP_RESULT_TX_HASH,
+        label: 'Transaction Hash',
+        result: result.callData.transactionId
+    }
+}
+
+
+static async getIDs(data) {
     let result = await Blockchain.get({
             config: DappLib.getConfig(),
             imports: {
-                DappState: data.account
+                DappState: deployerAddress
             },
             roles: {
                 proposer: data.account
@@ -71,6 +122,32 @@ static async getIDs(data) {
         'basic_nft_getIDs',
         {
             Address: data.account
+        }
+    );
+
+    return {
+        type: DappLib.DAPP_RESULT_ARRAY,
+        label: 'NFT IDs',
+        result: result.callData || []
+    }
+}
+
+
+static async getAllMetadata(data) {
+    const ids = (await DappLib.getIDs(data)).result;
+    let result = await Blockchain.get({
+            config: DappLib.getConfig(),
+            imports: {
+                DappState: deployerAddress
+            },
+            roles: {
+                proposer: data.account
+            }
+        },
+        'basic_nft_getMetadata',
+        {
+            'Address': data.account,
+            '[UInt64]': ids
         }
     );
 

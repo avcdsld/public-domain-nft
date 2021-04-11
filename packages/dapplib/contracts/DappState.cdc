@@ -1,14 +1,17 @@
 pub contract DappState {
-
+    pub let minter: @NFTMinter
 
   // Declare the NFT resource type
     pub resource NFT {
         // The unique ID that differentiates each NFT
         pub let id: UInt64
 
+        pub let metadata: {String: String}
+
         // Initialize both fields in the init function
-        init(initID: UInt64) {
+        init(initID: UInt64, metadata: {String: String}) {
             self.id = initID
+            self.metadata = metadata
         }
     }
 
@@ -23,6 +26,8 @@ pub contract DappState {
         pub fun getIDs(): [UInt64]
 
         pub fun idExists(id: UInt64): Bool
+
+        pub fun borrowNFT(id: UInt64): &NFT
     }
 
     // The definition of the Collection resource that
@@ -69,6 +74,10 @@ pub contract DappState {
             return self.ownedNFTs.keys
         }
 
+        pub fun borrowNFT(id: UInt64): &NFT {
+            return &self.ownedNFTs[id] as &NFT
+        }
+
         destroy() {
             destroy self.ownedNFTs
         }
@@ -100,17 +109,22 @@ pub contract DappState {
         // Function that mints a new NFT with a new ID
         // and deposits it in the recipients collection 
         // using their collection reference
-        pub fun mintNFT(recipient: &AnyResource{NFTReceiver}) {
+        pub fun mintNFT(recipient: &AnyResource{NFTReceiver}, metadata: {String: String}) {
 
             // create a new NFT
-            var newNFT <- create NFT(initID: self.idCount)
+            var newNFT <- create NFT(initID: self.idCount, metadata: metadata)
             
             // deposit it in the recipient's account using their reference
             recipient.deposit(token: <-newNFT)
 
             // change the id so that each ID is unique
-            self.idCount = self.idCount + UInt64(1)
+            self.idCount = self.idCount + 1 as UInt64
         }
+    }
+
+
+    pub fun mintNFT(recipient: &AnyResource{NFTReceiver}, metadata: {String: String}) {
+        self.minter.mintNFT(recipient: recipient, metadata: metadata)
     }
 
 
@@ -118,15 +132,14 @@ pub contract DappState {
 
 
 		// store an empty NFT Collection in account storage
-        self.account.save(<-self.createEmptyCollection(), to: /storage/NFTCollection)
+        self.account.save(<-DappState.createEmptyCollection(), to: /storage/NFTCollection)
 
         // publish a reference to the Collection in storage
         self.account.link<&{NFTReceiver}>(/public/NFTReceiver, target: /storage/NFTCollection)
 
-        // store a minter resource in account storage
-        self.account.save(<-create NFTMinter(), to: /storage/NFTMinter)
-
-
+        // // store a minter resource in account storage
+        // self.account.save(<-create NFTMinter(), to: /storage/NFTMinter)
+        self.minter <- create NFTMinter()
 
     }
 }

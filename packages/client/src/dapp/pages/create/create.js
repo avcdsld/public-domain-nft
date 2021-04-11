@@ -7,8 +7,8 @@ import "../../../lib/components/widgets/number-widget.js";
 import DappLib from "@decentology/dappstarter-dapplib";
 import { LitElement, html, customElement, property } from "lit-element";
 
-@customElement('basic-nft-page')
-export default class BasicNftPage extends LitElement {
+@customElement('create-page')
+export default class CreatePage extends LitElement {
   @property()
   title;
   @property()
@@ -26,12 +26,8 @@ export default class BasicNftPage extends LitElement {
 
   render() {
     let content = html`
-      <page-body
-        title="${this.title}"
-        category="${this.category}"
-        description="${this.description}"
-      >
-
+      <page-body>
+        <!--
         <action-card
           title="Account Query Example"
           description="An example of how to query an account during development"
@@ -46,14 +42,38 @@ export default class BasicNftPage extends LitElement {
           >
           </account-widget>
         </action-card>
+        -->
 
 
         <action-card
-          title="Initialize Account"
-          description="Initializes an account so it can receive a NFT"
-          action="initializeAccount"
+          title="🖼 Create Public Domain NFT"
+          description="Mint new NFT for Account"
+          action="mintNFT"
           method="post"
+          fields="account url"
+          text="Create"
+        >
+          <account-widget
+            field="account"
+            label="Account"
+            placeholder="Account address"
+          >
+          </account-widget>
+          <text-widget
+            field="url"
+            label="URL"
+            placeholder="URL of metmuseum.org"
+          >
+          </text-widget>
+        </action-card>
+
+        <action-card
+          title="🔍 Get NFT IDs"
+          description="Get NFT IDs for Account"
+          action="getIDs"
+          method="get"
           fields="account"
+          text="Get"
         >
           <account-widget
             field="account"
@@ -63,12 +83,14 @@ export default class BasicNftPage extends LitElement {
           </account-widget>
         </action-card>
 
+
         <action-card
-          title="Get NFT IDs"
-          description="Get NFT IDs for Account"
-          action="getIDs"
-          method="get"
+          title="⚠ Delete Account Collection"
+          description="Delete all NFTs in the collection for Account"
+          action="initializeAccount"
+          method="post"
           fields="account"
+          text="Delete"
         >
           <account-widget
             field="account"

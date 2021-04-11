@@ -46,10 +46,10 @@ export default class PageLoader extends LitElement {
     try {
       if (pageItem.name === 'dapp') {
         await import(`../../pages/${pageItem.name}.js`);
-      } else if (pageItem.name === 'harness') {
-        await import(`../../pages/harness/${pageItem.name}.js`);
-      } else {
-        await import(`../../pages/harness/${pageItem.name}-page.js`);
+      } else if (pageItem.name === 'create') {
+        await import(`../../pages/create/${pageItem.name}.js`);
+      } else if (pageItem.name === 'gallery') {
+        await import(`../../pages/gallery/${pageItem.name}.js`);
       }
       let pageName = pageItem.name.replace("_", "-") + "-page";
 
